@@ -34,8 +34,10 @@ void initialize_game(ChessGame *game) {
                         game->chessboard[r][c] = 'r';
                         continue;      
                 }
-            }else if(r == 1 || r == 6){
+            }else if(r == 1){
                 game->chessboard[r][c] = 'p';
+            }else if(r == 6){
+                game->chessboard[r][c] = 'P';
             }else if(r == 7){
                 switch(c){
                     case 0: 
@@ -63,6 +65,8 @@ void initialize_game(ChessGame *game) {
                         game->chessboard[r][c] = 'R';
                         continue;      
                 }
+            }else{
+                game->chessboard[r][c] = '.';
             }
         }
     }
@@ -75,6 +79,9 @@ void chessboard_to_fen(char fen[], ChessGame *game) {
 }
 
 bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
+    if (!(game->currentPlayer)){
+        
+    }
     (void)piece;
     (void)src_row;
     (void)src_col;
