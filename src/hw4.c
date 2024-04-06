@@ -5,8 +5,8 @@ void initialize_game(ChessGame *game) {
     game->moveCount = 0;
     game->currentPlayer = 0;
 
-    for(int r = 0; r < 7; r++){
-        for (int c = 0; c < 7; c++){
+    for(int r = 0; r < 8; r++){
+        for (int c = 0; c < 8; c++){
             if(r == 0){
                 switch(c){
                     case 0: 
@@ -78,17 +78,53 @@ void chessboard_to_fen(char fen[], ChessGame *game) {
     (void)game;
 }
 
+bool isWhitePiece(char piece){
+    if (piece == 'R' || piece == 'N' || piece == 'B' || piece == 'Q' || piece == 'K' || piece == 'P'){
+        return true;
+    }
+    return false;
+}
+
 bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
     if (!(game->currentPlayer)){
-        
+        if(dest_row + 1 == src_row && src_col == dest_col){
+            if(game->chessboard[dest_row][dest_col] == '.'){
+                return true;
+            }
+        }else if(src_row == 6 && dest_row + 2 == src_row && src_col == dest_col){
+            if(game->chessboard[dest_row][dest_col] == '.' && game->chessboard[dest_row+1][dest_col] == '.'){
+                return true;
+            }
+        }else if(dest_row + 1 == src_row && dest_col + 1 == src_col){
+            if(game->chessboard[dest_row][dest_col] != '.' && !isWhitePiece(game->chessboard[dest_row][dest_col])){
+                return true;
+            }
+        }else if (dest_row + 1 == src_row && dest_col - 1 == src_col){
+            if(game->chessboard[dest_row][dest_col] != '.' && !isWhitePiece(game->chessboard[dest_row][dest_col])){
+                return true;
+            }
+        }
+        return false;
+    }else{
+        if(dest_row - 1 == src_row && src_col == dest_col){
+            if(game->chessboard[dest_row][dest_col] == '.'){
+                return true;
+            }
+        }else if(src_row == 1 && dest_row - 2 == src_row && src_col == dest_col){
+            if(game->chessboard[dest_row][dest_col] == '.' && game->chessboard[dest_row-1][dest_col] == '.'){
+                return true;
+            }
+        }else if(dest_row - 1 == src_row && dest_col + 1 == src_col){
+            if(game->chessboard[dest_row][dest_col] != '.' && isWhitePiece(game->chessboard[dest_row][dest_col])){
+                return true;
+            }
+        }else if (dest_row - 1 == src_row && dest_col - 1 == src_col){
+            if(game->chessboard[dest_row][dest_col] != '.' && isWhitePiece(game->chessboard[dest_row][dest_col])){
+                return true;
+            }
+        }
+        return false;
     }
-    (void)piece;
-    (void)src_row;
-    (void)src_col;
-    (void)dest_row;
-    (void)dest_col;
-    (void)game;
-    return false;
 }
 
 bool is_valid_rook_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
