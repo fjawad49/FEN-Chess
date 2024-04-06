@@ -1,7 +1,72 @@
 #include "hw4.h"
 
 void initialize_game(ChessGame *game) {
-    (void)game;
+    game->capturedCount = 0;
+    game->moveCount = 0;
+    game->currentPlayer = 0;
+
+    for(int r = 0; r < 7; r++){
+        for (int c = 0; c < 7; c++){
+            if(r == 0){
+                switch(c){
+                    case 0: 
+                        game->chessboard[r][c] = 'r';
+                        continue;
+                    case 1: 
+                        game->chessboard[r][c] = 'n';
+                        continue;
+                    case 2: 
+                        game->chessboard[r][c] = 'b';
+                        continue;
+                    case 3: 
+                        game->chessboard[r][c] = 'q';
+                        continue;
+                    case 4: 
+                        game->chessboard[r][c] = 'k';
+                        continue;
+                    case 5: 
+                        game->chessboard[r][c] = 'b';
+                        continue;
+                    case 6: 
+                        game->chessboard[r][c] = 'n';
+                        continue;
+                    case 7: 
+                        game->chessboard[r][c] = 'r';
+                        continue;      
+                }
+            }else if(r == 1 || r == 6){
+                game->chessboard[r][c] = 'p';
+            }else if(r == 7){
+                switch(c){
+                    case 0: 
+                        game->chessboard[r][c] = 'R';
+                        continue;
+                    case 1: 
+                        game->chessboard[r][c] = 'N';
+                        continue;
+                    case 2: 
+                        game->chessboard[r][c] = 'B';
+                        continue;
+                    case 3: 
+                        game->chessboard[r][c] = 'Q';
+                        continue;
+                    case 4: 
+                        game->chessboard[r][c] = 'K';
+                        continue;
+                    case 5: 
+                        game->chessboard[r][c] = 'B';
+                        continue;
+                    case 6: 
+                        game->chessboard[r][c] = 'N';
+                        continue;
+                    case 7: 
+                        game->chessboard[r][c] = 'R';
+                        continue;      
+                }
+            }
+        }
+    }
+    display_chessboard(game);
 }
 
 void chessboard_to_fen(char fen[], ChessGame *game) {
