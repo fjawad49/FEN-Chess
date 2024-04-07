@@ -396,6 +396,7 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     int dest_row= get_pos_row(move->endSquare);
     int dest_col= get_pos_col(move->endSquare);
     if(validate_move){
+        printf("%d %d\n", game->currentPlayer, is_client);
         if (game->currentPlayer == 1 && is_client) 
             return MOVE_OUT_OF_TURN;
         if (game->currentPlayer == 0 && !is_client) 
@@ -405,7 +406,7 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         if(is_client){
             if(!(isWhitePiece(game->chessboard[src_row][src_col])))
                 return MOVE_WRONG_COLOR;
-            if((isWhitePiece(game->chessboard[dest_row][dest_col])))
+            if(game->chessboard[dest_row][dest_col] != '.' && (isWhitePiece(game->chessboard[dest_row][dest_col])))
                 return MOVE_SUS;
             if(move->endSquare[3]!= '\0' && game->chessboard[src_row][src_col] != 'P')
                 return MOVE_NOT_A_PAWN;
@@ -414,7 +415,7 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         }else{
             if((isWhitePiece(game->chessboard[src_row][src_col])))
                 return MOVE_WRONG_COLOR;
-            if(!(isWhitePiece(game->chessboard[dest_row][dest_col])))
+            if(game->chessboard[dest_row][dest_col] != '.' && !(isWhitePiece(game->chessboard[dest_row][dest_col])))
                 return MOVE_SUS;
             if(move->endSquare[3]!= '\0' && game->chessboard[src_row][src_col] != 'p')
                 return MOVE_NOT_A_PAWN;
@@ -422,7 +423,7 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
                 return MOVE_MISSING_PROMOTION;
         }
         if(is_valid_move(game->chessboard[dest_row][dest_col], src_row, src_col, dest_row, dest_col, game))
-                return MOVE_WRONG;
+            return MOVE_WRONG;
     }
     if (game->chessboard[src_row][src_col] == 'P' && dest_row == 0){
         game->chessboard[src_row][src_col] = toupper(move->endSquare[2]);
@@ -436,7 +437,14 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     }
     game->chessboard[dest_row][dest_col] = game->chessboard[src_row][src_col];
     game->chessboard[src_row][src_col] = '.';
-    game->currentPlayer = (game->currentPlayer)? 0 : 1;
+    game->moves[game->moveCount] = *move;
+    game->moveCount++;
+    if(game->currentPlayer == 1){
+        game->currentPlayer = 0;
+    }else{
+        game->currentPlayer = 1;
+    }
+    printf("%d\n", game->currentPlayer);
     return 0;
 }
 
