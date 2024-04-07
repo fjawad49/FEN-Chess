@@ -1,7 +1,5 @@
 #include "hw4.h"
-int main(){
-    return 0;
-}
+
 void initialize_game(ChessGame *game) {
     game->capturedCount = 0;
     game->moveCount = 0;
