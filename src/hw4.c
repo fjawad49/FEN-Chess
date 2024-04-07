@@ -296,7 +296,7 @@ int parse_move(const char *move, ChessMove *parsed_move) {
     char startSqaure[3], endSquare[4];
     int move_length = 0;
     bool invalid_col = false;
-    while (*move_pos != 0){
+    while (*move_pos != '\0'){
         if((move_length == 0 || move_length == 2)){
             if((*move_pos < 'a' || *move_pos > 'h')){
                 return PARSE_MOVE_INVALID_FORMAT;
@@ -341,7 +341,9 @@ int parse_move(const char *move, ChessMove *parsed_move) {
     parsed_move->startSquare[1] = startSqaure[1];
     parsed_move->endSquare[0] = endSquare[0];
     parsed_move->endSquare[1] = endSquare[1];
-    parsed_move->endSquare[2] = endSquare[2];
+    if(move_length == 5){
+        parsed_move->endSquare[2] = endSquare[2];
+    }
 
     return 0;
 }
