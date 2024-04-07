@@ -224,10 +224,11 @@ bool is_valid_queen_move(int src_row, int src_col, int dest_row, int dest_col, C
 }
 
 bool is_valid_king_move(int src_row, int src_col, int dest_row, int dest_col) {
-    (void)src_row;
-    (void)src_col;
-    (void)dest_row;
-    (void)dest_col;
+    if((dest_row == src_row + 1 || dest_row == src_row - 1) && (dest_col == src_col || dest_col == src_col+1 || dest_col == src_col-1))
+        return true;
+    else if(dest_row == src_row && (dest_col == src_col+1 || dest_col == src_col-1)){
+        return true;
+    }
     return false;
 }
 
@@ -265,6 +266,12 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
         break;
     case 'Q':
         return is_valid_queen_move(src_row, src_col, dest_row, dest_col, game);
+        break;
+    case 'k':
+        return is_valid_king_move(src_row, src_col, dest_row, dest_col);
+        break;
+    case 'K':
+        return is_valid_king_move(src_row, src_col, dest_row, dest_col);
         break;
     default:
         break;
