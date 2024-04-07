@@ -308,8 +308,31 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
 }
 
 void fen_to_chessboard(const char *fen, ChessGame *game) {
-    (void)fen;
-    (void)game;
+    const char *fen_pos = fen;
+    char empty_spaces = '0';
+    for(int r = 0; r < 8; r++){
+        for (int c = 0; c < 8; c++){
+            if(empty_spaces == '0'){
+                if(*fen_pos >= '1' && *fen_pos <= '9'){
+                    game->chessboard[r][c] = '.';
+                    empty_spaces = *fen_pos - 1;
+                    fen_pos++;
+                }else{
+                    game->chessboard[r][c] = *fen_pos;
+                    fen_pos++;
+                }
+                continue;
+            }
+            game->chessboard[r][c] = '.';
+            empty_spaces -= 1;
+        }
+        fen_pos++;
+    }
+    if(*fen_pos == 'w'){
+        game->currentPlayer = 0;
+    }else{
+        game->currentPlayer = 1;
+    }
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) {
@@ -431,15 +454,15 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         if(game->chessboard[src_row][src_col] == '.')
             return MOVE_NOTHING;
         if(is_client){
+            display_chessboard(game);
             if(!(isWhitePiece(game->chessboard[src_row][src_col]))){
-                display_chessboard(game);
                 return MOVE_WRONG_COLOR;
             }
             if(game->chessboard[dest_row][dest_col] != '.' && (isWhitePiece(game->chessboard[dest_row][dest_col])))
                 return MOVE_SUS;
             if(move->endSquare[3]!= '\0' && game->chessboard[src_row][src_col] != 'P')
                 return MOVE_NOT_A_PAWN;
-            if(game->chessboard[src_row][src_col] == 'P' && dest_row == 0 && move->endSquare[3] == '\0')
+            if(game->chessboard[src_row][src_col] == 'P' && dest_row == 0 && move->endSquare[2] == '\0')
                 return MOVE_MISSING_PROMOTION;
         }else{
             if((isWhitePiece(game->chessboard[src_row][src_col])))
@@ -448,7 +471,7 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
                 return MOVE_SUS;
             if(move->endSquare[3]!= '\0' && game->chessboard[src_row][src_col] != 'p')
                 return MOVE_NOT_A_PAWN;
-            if(game->chessboard[src_row][src_col] == 'p' && dest_row == 7 && move->endSquare[3] == '\0')
+            if(game->chessboard[src_row][src_col] == 'p' && dest_row == 7 && move->endSquare[2] == '\0')
                 return MOVE_MISSING_PROMOTION;
         }
         if(is_valid_move(game->chessboard[dest_row][dest_col], src_row, src_col, dest_row, dest_col, game))
