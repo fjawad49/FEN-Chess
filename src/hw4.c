@@ -339,6 +339,7 @@ int parse_move(const char *move, ChessMove *parsed_move) {
     }
     parsed_move->startSquare[0] = startSqaure[0];
     parsed_move->startSquare[1] = startSqaure[1];
+    parsed_move->startSquare[2] = '\0';
     parsed_move->endSquare[0] = endSquare[0];
     parsed_move->endSquare[1] = endSquare[1];
     if(move_length == 5){
@@ -346,6 +347,7 @@ int parse_move(const char *move, ChessMove *parsed_move) {
     }else{
         parsed_move->endSquare[2] = '\0';
     }
+    parsed_move->endSquare[3] = '\0';
 
     return 0;
 }
