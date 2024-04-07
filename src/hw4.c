@@ -1,5 +1,7 @@
 #include "hw4.h"
-
+int main(){
+    return 0;
+}
 void initialize_game(ChessGame *game) {
     game->capturedCount = 0;
     game->moveCount = 0;
@@ -176,7 +178,15 @@ bool is_valid_knight_move(int src_row, int src_col, int dest_row, int dest_col) 
 }
 
 bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
-    if(dest_row - src_row == dest_col - src_col){
+    int row_diff = dest_row - src_row, col_diff = dest_col - src_col;
+    if (row_diff < 0){
+        row_diff *= -1;
+    }
+    if (col_diff < 0){
+        col_diff *= -1;
+    }
+    //printf("%d %d\n", row_diff, col_diff);
+    if(row_diff == col_diff){
         if(dest_row < src_row && dest_col < src_col){
             for (int r = dest_row + 1, c = dest_col + 1; r < src_row; r++,c++){
                 if(game->chessboard[r][c] != '.'){
@@ -184,11 +194,14 @@ bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, 
                 }
             }
         }else if(dest_row < src_row && dest_col > src_col){
+            //printf("rc: %d %d rc: %d %d\n",src_row,src_col,dest_row,dest_col );
             for (int r = dest_row + 1, c = dest_col - 1; r < src_row; r++,c--){
                 if(game->chessboard[r][c] != '.'){
                     return false;
                 }
             }
+                        printf("rc: %d %d rc: %d %d\n",src_row,src_col,dest_row,dest_col );
+
         }else if(dest_row > src_row && dest_col < src_col){
             for (int r = dest_row - 1, c = dest_col + 1; r < src_row; r--,c++){
                 if(game->chessboard[r][c] != '.'){
@@ -202,6 +215,8 @@ bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, 
                 }
             }
         }
+    }else{
+        return false;
     }
     return true;
 }
