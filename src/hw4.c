@@ -396,22 +396,35 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     int dest_row= get_pos_row(move->endSquare);
     int dest_col= get_pos_col(move->endSquare);
     if(validate_move){
-        if (!is_client) 
+        if (game->currentPlayer == 1 && is_client) 
+            return MOVE_OUT_OF_TURN;
+        if (game->currentPlayer == 0 && !is_client) 
             return MOVE_OUT_OF_TURN;
         if(game->chessboard[src_row][src_col] == '.')
             return MOVE_NOTHING;
-        if(!(isWhitePiece(game->chessboard[src_row][src_col])))
-            return MOVE_WRONG_COLOR;
-        if((isWhitePiece(game->chessboard[dest_row][dest_col])))
-            return MOVE_SUS;
-        if(move->endSquare[3]!= '\0' && game->chessboard[dest_row][dest_col] != 'P')
-            return MOVE_NOT_A_PAWN;
-        if(game->chessboard[dest_row][dest_col] == 'P' && dest_col == 0 && move->endSquare[3] == '\0')
-            return MOVE_MISSING_PROMOTION;
+        if(is_client){
+            if(!(isWhitePiece(game->chessboard[src_row][src_col])))
+                return MOVE_WRONG_COLOR;
+            if((isWhitePiece(game->chessboard[dest_row][dest_col])))
+                return MOVE_SUS;
+            if(move->endSquare[3]!= '\0' && game->chessboard[dest_row][dest_col] != 'P')
+                return MOVE_NOT_A_PAWN;
+            if(game->chessboard[dest_row][dest_col] == 'P' && dest_row == 0 && move->endSquare[3] == '\0')
+                return MOVE_MISSING_PROMOTION;
+        }else{
+            if((isWhitePiece(game->chessboard[src_row][src_col])))
+                return MOVE_WRONG_COLOR;
+            if(!(isWhitePiece(game->chessboard[dest_row][dest_col])))
+                return MOVE_SUS;
+            if(move->endSquare[3]!= '\0' && game->chessboard[dest_row][dest_col] != 'p')
+                return MOVE_NOT_A_PAWN;
+            if(game->chessboard[dest_row][dest_col] == 'p' && dest_row == 7 && move->endSquare[3] == '\0')
+                return MOVE_MISSING_PROMOTION;
+        }
         if(is_valid_move(game->chessboard[dest_row][dest_col], src_row, src_col, dest_row, dest_col, game))
-            return MOVE_WRONG;
+                return MOVE_WRONG;
     }
-
+    game->currentPlayer = (game->currentPlayer)? 0 : 1;
     return 0;
 }
 
