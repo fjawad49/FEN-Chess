@@ -446,7 +446,6 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     int dest_row= get_pos_row(move->endSquare);
     int dest_col= get_pos_col(move->endSquare);
     if(validate_move){
-        printf("%d %d\n", game->currentPlayer, is_client);
         if (game->currentPlayer == 1 && is_client) 
             return MOVE_OUT_OF_TURN;
         if (game->currentPlayer == 0 && !is_client) 
@@ -474,7 +473,7 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
             if(game->chessboard[src_row][src_col] == 'p' && dest_row == 7 && move->endSquare[2] == '\0')
                 return MOVE_MISSING_PROMOTION;
         }
-        if(is_valid_move(game->chessboard[dest_row][dest_col], src_row, src_col, dest_row, dest_col, game))
+        if(!is_valid_move(game->chessboard[src_row][src_col], src_row, src_col, dest_row, dest_col, game))
             return MOVE_WRONG;
     }
     if (game->chessboard[src_row][src_col] == 'P' && dest_row == 0){
