@@ -201,13 +201,13 @@ bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, 
                         printf("rc: %d %d rc: %d %d\n",src_row,src_col,dest_row,dest_col );
 
         }else if(dest_row > src_row && dest_col < src_col){
-            for (int r = dest_row - 1, c = dest_col + 1; r < src_row; r--,c++){
+            for (int r = dest_row - 1, c = dest_col + 1; r > src_row; r--,c++){
                 if(game->chessboard[r][c] != '.'){
                     return false;
                 }
             }
         }else if(dest_row > src_row && dest_col > src_col){
-            for (int r = dest_row - 1, c = dest_col - 1; r < src_row; r--,c--){
+            for (int r = dest_row - 1, c = dest_col - 1; r > src_row; r--,c--){
                 if(game->chessboard[r][c] != '.'){
                     return false;
                 }
