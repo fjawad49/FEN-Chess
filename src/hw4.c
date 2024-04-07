@@ -407,23 +407,35 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
                 return MOVE_WRONG_COLOR;
             if((isWhitePiece(game->chessboard[dest_row][dest_col])))
                 return MOVE_SUS;
-            if(move->endSquare[3]!= '\0' && game->chessboard[dest_row][dest_col] != 'P')
+            if(move->endSquare[3]!= '\0' && game->chessboard[src_row][src_col] != 'P')
                 return MOVE_NOT_A_PAWN;
-            if(game->chessboard[dest_row][dest_col] == 'P' && dest_row == 0 && move->endSquare[3] == '\0')
+            if(game->chessboard[src_row][src_col] == 'P' && dest_row == 0 && move->endSquare[3] == '\0')
                 return MOVE_MISSING_PROMOTION;
         }else{
             if((isWhitePiece(game->chessboard[src_row][src_col])))
                 return MOVE_WRONG_COLOR;
             if(!(isWhitePiece(game->chessboard[dest_row][dest_col])))
                 return MOVE_SUS;
-            if(move->endSquare[3]!= '\0' && game->chessboard[dest_row][dest_col] != 'p')
+            if(move->endSquare[3]!= '\0' && game->chessboard[src_row][src_col] != 'p')
                 return MOVE_NOT_A_PAWN;
-            if(game->chessboard[dest_row][dest_col] == 'p' && dest_row == 7 && move->endSquare[3] == '\0')
+            if(game->chessboard[src_row][src_col] == 'p' && dest_row == 7 && move->endSquare[3] == '\0')
                 return MOVE_MISSING_PROMOTION;
         }
         if(is_valid_move(game->chessboard[dest_row][dest_col], src_row, src_col, dest_row, dest_col, game))
                 return MOVE_WRONG;
     }
+    if (game->chessboard[src_row][src_col] == 'P' && dest_row == 0){
+        game->chessboard[src_row][src_col] = toupper(move->endSquare[2]);
+    }
+    if (game->chessboard[src_row][src_col] == 'p' && dest_row == 7){
+        game->chessboard[src_row][src_col] = move->endSquare[2];
+    }
+    if(game->chessboard[dest_row][dest_col] != '.'){
+        game->capturedPieces[game->capturedCount] = game->chessboard[dest_row][dest_col];
+        game->capturedCount++;
+    }
+    game->chessboard[dest_row][dest_col] = game->chessboard[src_row][src_col];
+    game->chessboard[src_row][src_col] = '.';
     game->currentPlayer = (game->currentPlayer)? 0 : 1;
     return 0;
 }
