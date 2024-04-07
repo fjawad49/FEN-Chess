@@ -363,6 +363,8 @@ int get_pos_col(char *pos){
         return 6;
     case 'h':
         return 7;
+    default:
+        return -1;
     }
 }
 
@@ -384,6 +386,8 @@ int get_pos_row(char *pos){
         return 1;
     case '8':
         return 0;
+    default:
+        return -1;
     }
 }
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
