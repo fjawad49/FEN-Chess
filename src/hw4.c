@@ -292,9 +292,58 @@ void fen_to_chessboard(const char *fen, ChessGame *game) {
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) {
-    (void)move;
-    (void)parsed_move;
-    return -999;
+    const char *move_pos = move;
+    char startSqaure[3], endSquare[4];
+    int move_length = 0;
+    bool invalid_col = false;
+    while (*move_pos != 0){
+        if((move_length == 0 || move_length == 2)){
+            if((*move_pos < 'a' || *move_pos > 'h')){
+                return PARSE_MOVE_INVALID_FORMAT;
+            }
+            else{
+                if (move_length == 0){
+                    startSqaure[0] = *move_pos;
+                }else{
+                    endSquare[0] = *move_pos;
+                }
+            }
+        }
+        if((move_length == 1 || move_length == 3)){
+            if((*move_pos < '1' || *move_pos > '8')){
+                invalid_col = true;
+            }
+            else{
+                if (move_length == 1){
+                    startSqaure[1] = *move_pos;
+                }else{
+                    endSquare[1] = *move_pos;
+                }
+            }
+        }
+        if (move_length == 4){
+            endSquare[2] = *move_pos;
+        }
+        move_pos++;
+        move_length++;    
+    }
+    if (move_length < 4 || move_length > 5)
+        return PARSE_MOVE_INVALID_FORMAT;
+    if (invalid_col)
+        return PARSE_MOVE_OUT_OF_BOUNDS;
+    if (move_length == 5){
+        if (!(startSqaure[1] == '7' && endSquare[1] == '8') && !(startSqaure[1] == '2' && endSquare[1] == '1'))
+            return PARSE_MOVE_INVALID_DESTINATION;
+        if(endSquare[2]!= 'q' && endSquare[2] != 'r' && endSquare[2] != 'b' && endSquare[2] != 'n')
+            return PARSE_MOVE_INVALID_PROMOTION;
+    }
+    parsed_move->startSquare[0] = startSqaure[0];
+    parsed_move->startSquare[1] = startSqaure[1];
+    parsed_move->endSquare[0] = endSquare[0];
+    parsed_move->endSquare[1] = endSquare[1];
+    parsed_move->endSquare[2] = endSquare[2];
+
+    return 0;
 }
 
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
