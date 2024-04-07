@@ -74,8 +74,35 @@ void initialize_game(ChessGame *game) {
 }
 
 void chessboard_to_fen(char fen[], ChessGame *game) {
-    (void)fen;
-    (void)game;
+    int fen_pos = 0;
+    char empty_spaces = '0';
+    for (int r = 0; r < 8; r++){
+        for (int c = 0; c < 8; c++){
+            if(game->chessboard[r][c] == '.'){
+                empty_spaces++;
+            }else{
+                if(empty_spaces != '0'){
+                    fen[fen_pos] = empty_spaces;
+                    fen_pos++;
+                    empty_spaces = '0';
+                }
+                fen[fen_pos] = game->chessboard[r][c];
+                fen_pos++;
+            }
+        }
+        if (empty_spaces != '0'){
+            fen[fen_pos] = empty_spaces;
+            fen_pos++;
+            empty_spaces = '0';
+        }
+        if(r!=7){
+            fen[fen_pos] = '/';
+            fen_pos++;
+        }
+    }
+    fen[fen_pos] = ' ';
+    fen[fen_pos + 1] = (game->currentPlayer)? 'b' : 'w';
+    fen[fen_pos + 2] = '\0';
 }
 
 bool isWhitePiece(char piece){
@@ -404,8 +431,10 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         if(game->chessboard[src_row][src_col] == '.')
             return MOVE_NOTHING;
         if(is_client){
-            if(!(isWhitePiece(game->chessboard[src_row][src_col])))
+            if(!(isWhitePiece(game->chessboard[src_row][src_col]))){
+                display_chessboard(game);
                 return MOVE_WRONG_COLOR;
+            }
             if(game->chessboard[dest_row][dest_col] != '.' && (isWhitePiece(game->chessboard[dest_row][dest_col])))
                 return MOVE_SUS;
             if(move->endSquare[3]!= '\0' && game->chessboard[src_row][src_col] != 'P')
