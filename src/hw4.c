@@ -277,12 +277,6 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
         break;
     }
     
-    (void)piece;
-    (void)src_row;
-    (void)src_col;
-    (void)dest_row;
-    (void)dest_col;
-    (void)game;
     return false;
 }
 
@@ -351,13 +345,70 @@ int parse_move(const char *move, ChessMove *parsed_move) {
 
     return 0;
 }
+int get_pos_col(char *pos){
+    switch (*pos){
+    case 'a':
+        return 0;
+    case 'b':
+        return 1;
+    case 'c':
+        return 2;
+    case 'd':
+        return 3;
+    case 'e':
+        return 4;
+    case 'f':
+        return 5;
+    case 'g':
+        return 6;
+    case 'h':
+        return 7;
+    }
+}
 
+int get_pos_row(char *pos){
+    switch (*(pos+1)){
+    case '1':
+        return 7;
+    case '2':
+        return 6;
+    case '3':
+        return 5;
+    case '4':
+        return 4;
+    case '5':
+        return 3;
+    case '6':
+        return 2;
+    case '7':
+        return 1;
+    case '8':
+        return 0;
+    }
+}
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
-    (void)game;
-    (void)move;
-    (void)is_client;
-    (void)validate_move;
-    return -999;
+    int src_row = get_pos_row(move->startSquare);
+    int src_col = get_pos_col(move->startSquare);
+    int dest_row= get_pos_row(move->endSquare);
+    int dest_col= get_pos_col(move->endSquare);
+    if(validate_move){
+        if (!is_client) 
+            return MOVE_OUT_OF_TURN;
+        if(game->chessboard[src_row][src_col] == '.')
+            return MOVE_NOTHING;
+        if(!(isWhitePiece(game->chessboard[src_row][src_col])))
+            return MOVE_WRONG_COLOR;
+        if((isWhitePiece(game->chessboard[dest_row][dest_col])))
+            return MOVE_SUS;
+        if(move->endSquare[3]!= '\0' && game->chessboard[dest_row][dest_col] != 'P')
+            return MOVE_NOT_A_PAWN;
+        if(game->chessboard[dest_row][dest_col] == 'P' && dest_col == 0 && move->endSquare[3] == '\0')
+            return MOVE_MISSING_PROMOTION;
+        if(is_valid_move(game->chessboard[dest_row][dest_col], src_row, src_col, dest_row, dest_col, game))
+            return MOVE_WRONG;
+    }
+
+    return 0;
 }
 
 int send_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
