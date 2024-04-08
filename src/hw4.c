@@ -644,7 +644,6 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
         break;
     case 'f':
         message_pos++;
-        close(socketfd);
         return COMMAND_FORFEIT;
     case 'i':
         if (is_client){
