@@ -70,7 +70,6 @@ void initialize_game(ChessGame *game) {
             }
         }
     }
-    display_chessboard(game);
 }
 
 void chessboard_to_fen(char fen[], ChessGame *game) {
@@ -453,7 +452,6 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
         if(game->chessboard[src_row][src_col] == '.')
             return MOVE_NOTHING;
         if(is_client){
-            display_chessboard(game);
             if(!(isWhitePiece(game->chessboard[src_row][src_col]))){
                 return MOVE_WRONG_COLOR;
             }
@@ -500,11 +498,114 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
 }
 
 int send_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
+    char commands[6][15] = {"/move","/forfeit","/chessboard", "/import", "/load", "/save"};
+    char command = '?';
+    const char *message_pos;
+    bool not_equal = 0;
+    for (int r = 0; r < 6; r++){
+        message_pos = message;
+        not_equal = 0;
+        for (int c = 0; commands[r][c] != '\0'; c++){
+            if(*message_pos != commands[r][c]){
+                not_equal = 1;
+                break;
+            }
+            message_pos++;
+        }
+        if (not_equal){
+            continue;
+        }
+        if (*message_pos != ' ' && *message_pos != '\0')
+            continue;
+        command = *(message+1); 
+        break;
+    }
+    switch (command){
+    case 'm':
+        message_pos++;
+        ChessMove parsed_move;
+        char move[5], *move_pos = &move[0];
+        while(*message_pos != '\0'){
+            *move_pos++ = *message_pos++;
+        }
+        *move_pos = '\0';
+        if (!parse_move(&move[0], &parsed_move) && !make_move(game, &parsed_move, is_client, 1)){
+            const char *m_buff = message;
+            send(socketfd, m_buff, 100, 0);
+            return COMMAND_MOVE;
+        }else{
+            return COMMAND_ERROR;
+        }
+        break;
+    case 'f':
+        message_pos++;
+        const char *f_buff = message;
+        send(socketfd, f_buff, 100, 0);
+        return COMMAND_FORFEIT;
+    case 'd':
+        display_chessboard(game);
+        const char *d_buff = message;
+        send(socketfd, d_buff, 100, 0);
+        return COMMAND_DISPLAY;
+    case 'i':
+        if (!is_client){
+            message_pos++;
+            char fen[80], *fen_pos = &fen[0];
+            for ( ; *message_pos != '\0'; ){
+                *fen_pos++ = *message_pos++;
+            }
+            *fen_pos = '\0';
+            const char *temp = &fen[0];
+            fen_to_chessboard(temp, game);
+            const char *i_buff = message;
+            send(socketfd, i_buff, 100, 0);
+            return COMMAND_IMPORT;
+        }else{
+            return COMMAND_ERROR;
+        }
+    case 's':
+        message_pos++;
+        char s_username[25], *s_name_pos = &s_username[0];
+        for( ; *message_pos != '\0'; )
+            *s_name_pos++ = *message_pos++;
+        *s_name_pos = '\0';
+        if (!save_game(game, s_username, "game_database.txt")){
+            const char *s_buff = message;
+            send(socketfd, s_buff, 100, 0);
+            return COMMAND_SAVE;
+        }else{
+            return COMMAND_ERROR;
+        }
+    case 'l':
+        message_pos++;
+        char l_username[25], *l_name_pos = &l_username[0];
+        for( ; *message_pos != '\0' && *message_pos != ' '; )
+            *l_name_pos++ = *message_pos++;
+        *l_name_pos = '\0';
+        if( *message_pos == '\0'){
+            return COMMAND_ERROR;
+        }
+        message_pos++;
+        int save_number = 0;
+        for( ; *message_pos != '\0'; ){
+            save_number = save_number * 10 + (*message_pos++ - 48);
+        }
+            
+        if (!load_game(game, l_username, "game_database.txt", save_number)){
+            const char *l_buff = message;
+            send(socketfd, l_buff, 100, 0);
+            return COMMAND_LOAD;
+        }else{
+            return COMMAND_ERROR;
+        }
+    default:
+        return COMMAND_UNKNOWN;
+    }
+    (void) commands;
     (void)game;
     (void)message;
     (void)socketfd;
     (void)is_client;
-    return -999;
 }
 
 int receive_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
@@ -516,18 +617,61 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
 }
 
 int save_game(ChessGame *game, const char *username, const char *db_filename) {
-    (void)game;
-    (void)username;
-    (void)db_filename;
-    return -999;
+    const char *name_pos = username;
+    while(*name_pos != '\0'){
+        if(*name_pos == ' ')
+            return -1;
+        name_pos++;
+    }
+    if(name_pos == username){
+        return -1;
+    }
+    char fen[80];
+    chessboard_to_fen(fen, game);
+    FILE *file = fopen(db_filename, "a");
+    if(file == NULL){
+        return -1;
+    }
+    fprintf(file,"%s:%s\n", username, fen);
+    fclose(file);
+    return 0;
 }
 
 int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number) {
-    (void)game;
-    (void)username;
-    (void)db_filename;
-    (void)save_number;
-    return -999;
+    FILE *file = fopen(db_filename, "r");
+    int save_pos = 0;
+    char saved_game [100], *saved_game_pos;
+    const char *name_pos = username;
+    while(save_pos != save_number && fscanf(file, "%s ", &saved_game[0]) > 0){
+        name_pos = username;
+        int invalid_name = 0;
+        for (saved_game_pos = &saved_game[0]; *saved_game_pos != ':'; saved_game_pos++, name_pos++){
+            if(*saved_game_pos != *name_pos){
+                invalid_name = 1;
+                break;
+            }
+        }
+        if(invalid_name){
+            continue;
+        }
+        if (*name_pos != '\0'){
+            continue;
+        }
+        save_pos++;
+    }
+    if(save_pos != save_number)
+        return -1;
+    saved_game_pos++;
+    char fen[80];
+    int fen_pos = 0;
+    while(*saved_game_pos != '\0'){
+        fen[fen_pos] = *saved_game_pos;
+        fen_pos++;
+        saved_game_pos++;
+    }
+    fen_to_chessboard(fen, game);
+    display_chessboard(game);
+    return 0;
 }
 
 void display_chessboard(ChessGame *game) {
