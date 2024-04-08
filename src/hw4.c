@@ -588,6 +588,9 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
         message_pos++;
         int save_number = 0;
         for( ; *message_pos != '\0'; ){
+            if(*message_pos < '1' || *message_pos > '9'){
+                return COMMAND_ERROR;
+            }
             save_number = save_number * 10 + (*message_pos++ - 48);
         }
             
@@ -671,6 +674,9 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
         message_pos++;
         int save_number = 0;
         for( ; *message_pos != '\0'; ){
+            if(*message_pos < '1' || *message_pos > '9'){
+                return COMMAND_ERROR;
+            }
             save_number = save_number * 10 + (*message_pos++ - 48);
         }
             
@@ -708,6 +714,9 @@ int save_game(ChessGame *game, const char *username, const char *db_filename) {
 }
 
 int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number) {
+    if (save_number == 0){
+        return -1;
+    }
     FILE *file = fopen(db_filename, "r");
     int save_pos = 0;
     char saved_game [100], *saved_game_pos;
@@ -729,8 +738,10 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
         }
         save_pos++;
     }
-    if(save_pos != save_number)
+    if(save_pos != save_number){
+        fclose(file);
         return -1;
+    }
     saved_game_pos++;
     char fen[80];
     int fen_pos = 0;
@@ -741,6 +752,7 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
     }
     fen_to_chessboard(fen, game);
     display_chessboard(game);
+    fclose(file);
     return 0;
 }
 
