@@ -601,19 +601,90 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
     default:
         return COMMAND_UNKNOWN;
     }
-    (void) commands;
-    (void)game;
-    (void)message;
-    (void)socketfd;
-    (void)is_client;
 }
 
 int receive_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
-    (void)game;
-    (void)message;
-    (void)socketfd;
-    (void)is_client;
-    return -999;
+   char commands[6][15] = {"/move","/forfeit", "/import", "/load"};
+    char command = '?';
+    const char *message_pos;
+    bool not_equal = 0;
+    for (int r = 0; r < 6; r++){
+        message_pos = message;
+        not_equal = 0;
+        for (int c = 0; commands[r][c] != '\0'; c++){
+            if(*message_pos != commands[r][c]){
+                not_equal = 1;
+                break;
+            }
+            message_pos++;
+        }
+        if (not_equal){
+            continue;
+        }
+        if (*message_pos != ' ' && *message_pos != '\0')
+            continue;
+        command = *(message+1); 
+        break;
+    }
+    switch (command){
+    case 'm':
+        message_pos++;
+        ChessMove parsed_move;
+        char move[5], *move_pos = &move[0];
+        while(*message_pos != '\0'){
+            *move_pos++ = *message_pos++;
+        }
+        *move_pos = '\0';
+        if (!parse_move(&move[0], &parsed_move)){
+            make_move(game, &parsed_move, is_client, 0);
+            return COMMAND_MOVE;
+        }else{
+            return COMMAND_ERROR;
+        }
+        break;
+    case 'f':
+        message_pos++;
+        close(socketfd);
+        return COMMAND_FORFEIT;
+    case 'i':
+        if (is_client){
+            message_pos++;
+            char fen[80], *fen_pos = &fen[0];
+            for ( ; *message_pos != '\0'; ){
+                *fen_pos++ = *message_pos++;
+            }
+            *fen_pos = '\0';
+            const char *temp = &fen[0];
+            fen_to_chessboard(temp, game);
+            return COMMAND_IMPORT;
+        }else{
+            return COMMAND_ERROR;
+        }
+    case 'l':
+        message_pos++;
+        char l_username[25], *l_name_pos = &l_username[0];
+        for( ; *message_pos != '\0' && *message_pos != ' '; )
+            *l_name_pos++ = *message_pos++;
+        *l_name_pos = '\0';
+        if( *message_pos == '\0'){
+            return COMMAND_ERROR;
+        }
+        message_pos++;
+        int save_number = 0;
+        for( ; *message_pos != '\0'; ){
+            save_number = save_number * 10 + (*message_pos++ - 48);
+        }
+            
+        if (!load_game(game, l_username, "game_database.txt", save_number)){
+            const char *l_buff = message;
+            send(socketfd, l_buff, 100, 0);
+            return COMMAND_LOAD;
+        }else{
+            return COMMAND_ERROR;
+        }
+    default:
+        return -1;
+    }
 }
 
 int save_game(ChessGame *game, const char *username, const char *db_filename) {
