@@ -62,7 +62,6 @@ int main() {
         int com = receive_command(&game, buffer, connfd, true);
         printf("Server Receive: %d\n", com);
         if (com == COMMAND_FORFEIT){
-            game.currentPlayer = 0;
             break;
         }
         
@@ -80,7 +79,6 @@ int main() {
         }
         printf("Server Send: %d\n", com);
         if (com == COMMAND_FORFEIT){
-            game.currentPlayer = 1;
             break;
         }
 

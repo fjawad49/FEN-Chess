@@ -100,7 +100,7 @@ void chessboard_to_fen(char fen[], ChessGame *game) {
         }
     }
     fen[fen_pos] = ' ';
-    fen[fen_pos + 1] = (game->currentPlayer)? 'b' : 'w';
+    fen[fen_pos + 1] = game->currentPlayer;
     fen[fen_pos + 2] = '\0';
 }
 

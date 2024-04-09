@@ -54,7 +54,6 @@ int main() {
             continue;
         }
         if(com == COMMAND_FORFEIT){
-            game.currentPlayer = 1;
             break;
         }
 
@@ -69,7 +68,6 @@ int main() {
         printf("Client Receive: %d\n", com);
                 display_chessboard(&game);
         if (com == COMMAND_FORFEIT){
-            game.currentPlayer = 0;
             break;
         }
     }
