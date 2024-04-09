@@ -54,6 +54,7 @@ int main() {
             continue;
         }
         if(com == COMMAND_FORFEIT){
+            game.currentPlayer = 1;
             break;
         }
 
@@ -67,8 +68,10 @@ int main() {
         com = receive_command(&game, buffer, connfd, false);
         printf("Client Receive: %d\n", com);
                 display_chessboard(&game);
-        if (com == COMMAND_FORFEIT)
+        if (com == COMMAND_FORFEIT){
+            game.currentPlayer = 0;
             break;
+        }
     }
     printf("Client connection closing\n");
     // Please ensure that the following lines of code execute just before your program terminates.

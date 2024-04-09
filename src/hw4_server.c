@@ -61,8 +61,10 @@ int main() {
         printf("Message Recived Server:%s\n", buffer);
         int com = receive_command(&game, buffer, connfd, true);
         printf("Server Receive: %d\n", com);
-        if (com == COMMAND_FORFEIT)
+        if (com == COMMAND_FORFEIT){
+            game.currentPlayer = 0;
             break;
+        }
         
         
         memset(buffer, 0, BUFFER_SIZE);
@@ -77,7 +79,8 @@ int main() {
             com = send_command(&game, buffer, connfd, false);
         }
         printf("Server Send: %d\n", com);
-        if(com == COMMAND_FORFEIT){
+        if (com == COMMAND_FORFEIT){
+            game.currentPlayer = 1;
             break;
         }
 
