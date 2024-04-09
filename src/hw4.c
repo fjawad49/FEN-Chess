@@ -209,7 +209,6 @@ bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, 
     if (col_diff < 0){
         col_diff *= -1;
     }
-    //printf("%d %d\n", row_diff, col_diff);
     if(row_diff == col_diff){
         if(dest_row < src_row && dest_col < src_col){
             for (int r = dest_row + 1, c = dest_col + 1; r < src_row; r++,c++){
@@ -218,13 +217,11 @@ bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, 
                 }
             }
         }else if(dest_row < src_row && dest_col > src_col){
-            //printf("rc: %d %d rc: %d %d\n",src_row,src_col,dest_row,dest_col );
             for (int r = dest_row + 1, c = dest_col - 1; r < src_row; r++,c--){
                 if(game->chessboard[r][c] != '.'){
                     return false;
                 }
             }
-                        printf("rc: %d %d rc: %d %d\n",src_row,src_col,dest_row,dest_col );
 
         }else if(dest_row > src_row && dest_col < src_col){
             for (int r = dest_row - 1, c = dest_col + 1; r > src_row; r--,c++){
@@ -493,7 +490,6 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     }else{
         game->currentPlayer = 1;
     }
-    printf("%d\n", game->currentPlayer);
     return 0;
 }
 
@@ -520,6 +516,7 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
         command = *(message+1); 
         break;
     }
+    printf("Com: %c\n", command);
     switch (command){
     case 'm':
         message_pos++;
@@ -544,8 +541,6 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
         return COMMAND_FORFEIT;
     case 'd':
         display_chessboard(game);
-        const char *d_buff = message;
-        send(socketfd, d_buff, 100, 0);
         return COMMAND_DISPLAY;
     case 'i':
         if (!is_client){
@@ -570,8 +565,6 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
             *s_name_pos++ = *message_pos++;
         *s_name_pos = '\0';
         if (!save_game(game, s_username, "game_database.txt")){
-            const char *s_buff = message;
-            send(socketfd, s_buff, 100, 0);
             return COMMAND_SAVE;
         }else{
             return COMMAND_ERROR;
