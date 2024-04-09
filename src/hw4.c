@@ -100,8 +100,9 @@ void chessboard_to_fen(char fen[], ChessGame *game) {
         }
     }
     fen[fen_pos] = ' ';
-    fen[fen_pos + 1] = game->currentPlayer;
+    fen[fen_pos + 1] = (game->currentPlayer)? 'b' : 'w';
     fen[fen_pos + 2] = '\0';
+    printf("Save: %s\n", fen);
 }
 
 bool isWhitePiece(char piece){
@@ -329,6 +330,8 @@ void fen_to_chessboard(const char *fen, ChessGame *game) {
     }else{
         game->currentPlayer = 1;
     }
+        printf("Fen: %s\n", fen);
+    printf("Load: %d\n", game->currentPlayer);
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) {
@@ -559,6 +562,7 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
             return COMMAND_ERROR;
         }
     case 's':
+        printf("Save: %d", game->currentPlayer);
         message_pos++;
         char s_username[25], *s_name_pos = &s_username[0];
         for( ; *message_pos != '\0'; )
@@ -713,8 +717,9 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
     FILE *file = fopen(db_filename, "r");
     int save_pos = 0;
     char saved_game [100], *saved_game_pos;
+    char player[2];
     const char *name_pos = username;
-    while(save_pos != save_number && fscanf(file, "%s ", &saved_game[0]) > 0){
+    while(save_pos != save_number && fscanf(file, "%s", &saved_game[0]) > 0 && fscanf(file, "%c", &player[0])){
         name_pos = username;
         int invalid_name = 0;
         for (saved_game_pos = &saved_game[0]; *saved_game_pos != ':'; saved_game_pos++, name_pos++){
@@ -743,6 +748,10 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
         fen_pos++;
         saved_game_pos++;
     }
+    fen[fen_pos++] = ' ';
+    fen[fen_pos++] = player[0];
+    fen[fen_pos] = '\0';
+    printf("lgame saved game: %s\n", saved_game);
     fen_to_chessboard(fen, game);
     display_chessboard(game);
     fclose(file);

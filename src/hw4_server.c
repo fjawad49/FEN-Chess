@@ -83,7 +83,6 @@ int main() {
         }
 
     }
-    printf("Server connection closing\n");
     close(connfd);
     close(listenfd);
     return EXIT_SUCCESS;

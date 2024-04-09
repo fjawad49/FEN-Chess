@@ -42,7 +42,7 @@ int main() {
         buffer[strlen(buffer)-1] = '\0';
         printf("Message Sent Client:%s\n", buffer);
         int com = send_command(&game, buffer, connfd, true);
-                display_chessboard(&game);
+        display_chessboard(&game);
         while(com == COMMAND_ERROR || com == COMMAND_UNKNOWN){
             memset(buffer, 0, BUFFER_SIZE);
             fgets(buffer, BUFFER_SIZE, stdin);
@@ -66,12 +66,11 @@ int main() {
         printf("Message Received Client:%s\n", buffer);
         com = receive_command(&game, buffer, connfd, false);
         printf("Client Receive: %d\n", com);
-                display_chessboard(&game);
+        display_chessboard(&game);
         if (com == COMMAND_FORFEIT){
             break;
         }
     }
-    printf("Client connection closing\n");
     // Please ensure that the following lines of code execute just before your program terminates.
     // If necessary, copy and paste it to other parts of your code where you terminate your program.
     FILE *temp = fopen("./fen.txt", "w");
@@ -80,6 +79,5 @@ int main() {
     fprintf(temp, "%s", fen);
     fclose(temp);
     close(connfd);
-        printf("hello\n");
     return EXIT_SUCCESS;
 }
