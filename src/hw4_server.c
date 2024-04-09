@@ -1,10 +1,13 @@
 #include "hw4.h"
+#define BUFFER_SIZE 1024
 
 int main() {
     int listenfd, connfd;
     struct sockaddr_in address;
     int opt = 1;
     int addrlen = sizeof(address);
+    char buffer[BUFFER_SIZE] = {0};
+    ChessGame game;
 
     // Create socket
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
@@ -46,10 +49,42 @@ int main() {
 
     INFO("Server accepted connection");
 
-    while (1) {
-        // Fill this in
-    }
+    initialize_game(&game);
 
+    while (1) {
+        memset(buffer, 0, BUFFER_SIZE);
+        int nbytes = read(connfd, buffer, BUFFER_SIZE);
+        if (nbytes <= 0) {
+            perror("[Server] read() failed.");
+            exit(EXIT_FAILURE);
+        }
+        printf("Message Recived Server:%s\n", buffer);
+        int com = receive_command(&game, buffer, connfd, true);
+        printf("Server Receive: %d\n", com);
+        if (com == COMMAND_FORFEIT)
+            break;
+        
+        
+        memset(buffer, 0, BUFFER_SIZE);
+        fgets(buffer, BUFFER_SIZE, stdin);
+        buffer[strlen(buffer)-1] = '\0';
+        printf("Message Sent Server:%s\n", buffer);
+        com = send_command(&game, buffer, connfd, false);
+        while(com == COMMAND_ERROR || com == COMMAND_UNKNOWN){
+            memset(buffer, 0, BUFFER_SIZE);
+            fgets(buffer, BUFFER_SIZE, stdin);
+            buffer[strlen(buffer)-1] = '\0';
+            com = send_command(&game, buffer, connfd, false);
+        }
+        printf("Server Send: %d\n", com);
+        if(com == COMMAND_FORFEIT){
+            break;
+        }
+
+    }
+    printf("Server connection closing\n");
+    close(connfd);
     close(listenfd);
-    return 0;
+    return EXIT_SUCCESS;
 }
+
